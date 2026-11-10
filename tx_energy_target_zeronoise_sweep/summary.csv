@@ -1,0 +1,5 @@
+config,bs_ant_num,ofdm_data_num,natural_energy,clean_zero_error_ratio_upper_bound,first_nonzero_ratio,first_nonzero_vpp_bits,first_nonzero_vpp_blocks
+8x8,8,96,1158.0,1.0,1.5,35,1
+16x16,16,96,2149.0,0.5,0.75,1,1
+32x32_sc1216,32,1216,101316.0,12.0,13.0,17,3
+32x32_sc96,32,96,8379.4,0.2,0.3,78,2

@@ -1,0 +1,55 @@
+{
+  "max_frame": 300, /* default is 9600; smaller value makes it easy to predict when user/chsim/agora finish and need to be stopped */
+  "freq_domain_channel": false,
+  "fft_size": 2048,
+  "ofdm_data_num": 1216,
+  "demul_block_size": 48,
+  "ul_mcs" : {
+    "mcs_index": 17 /*64QAM, 616/1024*/
+  },
+  "dl_mcs" : {
+    "mcs_index": 17 /*64QAM, 616/1024*/
+  },
+  /* set sample rate to 1Ms
+  to make sure tests pass*/
+  "sample_rate" : 3584000,
+  /* no "spatial_streams" key: config.cc defaults it to ue_ant_num_ (here
+  ue_radio_num=16), so every subcarrier serves all 16 UEs at once (16x16
+  square MIMO) instead of round-robin'ing a smaller subset. */
+  "freq_orthogonal_pilot": true,
+  "beamforming": "VPP",
+  "vpp_num_replicas": 6,
+  "vpp_runs": 2,
+  "vpp_iters": 25,
+  "noiseless_pilots": true,
+  "dl_noiseless_pilots": true,
+  "ue_radio_num": 8,
+  "bs_radio_num": 8,
+  /* 14 symbols: beacon + 1 shared pilot (serves both UL and DL channel
+  estimation) + 12 downlink data symbols, no uplink data at all.
+  Beacon IS required even in this UDP-loopback sim -- not for timing sync
+  (packets carry explicit frame_id/symbol_id headers), but because
+  phy-ue.cc's UE-side pilot-TX scheduling (the ONLY place that fires
+  EventType::kPacketPilotTX) is gated on symbol_id == GetBeaconSymbolLast().
+  With zero beacons that call returns SIZE_MAX, the condition never fires,
+  the UE never transmits its pilot, the BS never gets CSI, and the whole
+  system hangs forever after startup sync (confirmed by testing). */
+  "frame_schedule": ["BPDDDDDDDDDDDD"],
+  "bs_server_port": 8100,
+  "bs_rru_port": 8200,
+  /* Exclude CPU 0 (default, kept) plus the ENTIRE HT-sibling block 96-191:
+  this turns core_offset/worker_thread_num into a simple direct mapping onto
+  physical cores 1-95 (each used by at most one thread, no SMT self-sharing),
+  instead of the NUMA-grouped primary+sibling permutation SetCpuLayoutOnNumaNodes
+  normally builds. Costs access to the other 96 hardware threads for this
+  pinning scheme; not needed here since 67(agora)+5(chsim)+5(user)=77 < 95. */
+  "exclude_cores": [0,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191],
+  "core_offset": 12,
+  "worker_thread_num": 64,
+  "socket_thread_num": 1,
+  "ue_core_offset": 1,
+  "ue_worker_thread_num": 2,
+  "ue_socket_thread_num": 1,
+  "noise_level": 0.001,
+  "noise_mode": 2 /* data_generator only: 0=unnormalized, 1=scale signal down by sqrt(UeAntNum), 2=scale noise up by sqrt(UeAntNum) instead */
+}
